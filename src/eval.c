@@ -149,7 +149,7 @@ static eval_t hanging(const Position *pos, int us, bitboard_t attacks[NB_COLOR][
 
     while (b)
         if (bishop_rook_xray(pos, bb_pop_lsb(&b), us))
-            result.op -= 10;
+            result.op -= 20;
 
     return result;
 }
