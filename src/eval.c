@@ -106,16 +106,15 @@ static eval_t pattern(const Position *pos, int us)
     return result;
 }
 
-bool bishop_xray(const Position *pos, int square, int us)
+bool bishop_rook_xray(const Position *pos, int square, int us)
 {
-    bitboard_t candidates = bb_bishop_attacks(square, 0) & pos_pieces_cp(pos, opposite(us), BISHOP);
+    const int them = opposite(us);
+    bitboard_t candidates = (bb_bishop_attacks(square, 0) & pos_pieces_cp(pos, them, BISHOP))
+        | (bb_rook_attacks(square, 0) & pos_pieces_cp(pos, them, ROOK));
 
-    while (candidates) {
-        const int candidate = bb_pop_lsb(&candidates);
-
-        if (bb_count(Segment[square][candidate] & pos_pieces(pos)) == 3)
+    while (candidates)
+        if (bb_count(Segment[square][bb_pop_lsb(&candidates)] & pos_pieces(pos)) == 3)
             return true;
-    }
 
     return false;
 }
@@ -145,13 +144,12 @@ static eval_t hanging(const Position *pos, int us, bitboard_t attacks[NB_COLOR][
     if (b)
         result.eg -= Hanging[PAWN] * bb_count(b);
 
-    // Bishop XRay threats on Rooks
-    b = pos_pieces_cp(pos, us, ROOK);
+    // Bishop XRay threats on Queens
+    b = pos_pieces_cp(pos, us, QUEEN);
 
-    while (b) {
-        if (bishop_xray(pos, bb_pop_lsb(&b), us))
+    while (b)
+        if (bishop_rook_xray(pos, bb_pop_lsb(&b), us))
             result.op -= 10;
-    }
 
     return result;
 }
