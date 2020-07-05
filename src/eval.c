@@ -112,9 +112,12 @@ bool bishop_rook_xray(const Position *pos, int square, int us)
     bitboard_t candidates = (bb_bishop_attacks(square, 0) & pos_pieces_cp(pos, them, BISHOP))
         | (bb_rook_attacks(square, 0) & pos_pieces_cp(pos, them, ROOK));
 
-    while (candidates)
-        if (bb_count(Segment[square][bb_pop_lsb(&candidates)] & pos_pieces(pos)) == 3)
+    while (candidates) {
+        const bitboard_t b = Segment[square][bb_pop_lsb(&candidates)] & pos_pieces(pos);
+
+        if (!(b & pos->byPiece[PAWN]) && bb_count(b) == 3)
             return true;
+    }
 
     return false;
 }
